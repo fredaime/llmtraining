@@ -38,18 +38,20 @@ func fetchCRL(url string) (*pkix.CertificateList, error) {
 
 // checkRevocation fetches the CRL partition based on serial prefix and checks if the serial is revoked.
 func checkRevocation(serial, baseURL string) (bool, error) {
-	serial = strings.TrimPrefix(serial, "0x")
+	serial = strings.TrimPrefix(strings.ToLower(serial), "0x")
 	if len(serial) < 2 {
 		return false, fmt.Errorf("serial too short")
 	}
-	prefix := strings.ToLower(serial[:2])
+	prefix := serial[:2]
 	url := fmt.Sprintf("%s/%s.crl", strings.TrimRight(baseURL, "/"), prefix)
 	crl, err := fetchCRL(url)
 	if err != nil {
 		return false, err
 	}
+	trimmedSerial := strings.TrimLeft(serial, "0")
 	for _, revoked := range crl.TBSCertList.RevokedCertificates {
-		if revoked.SerialNumber.String() == strings.TrimLeft(serial, "0") {
+		revokedHex := strings.TrimLeft(fmt.Sprintf("%x", revoked.SerialNumber), "0")
+		if revokedHex == trimmedSerial {
 			return true, nil
 		}
 	}
