@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "project": "Cryptolang",
+  "description": "Reinforcement-Learning and Low-Rank Value Representation framework for Cryptolang compiler and runtime generation",
+  "author": "Frédéric Aimé",
+  "organization": "Schneider Electric",
+  "parameters": {
+    "iterations": 10,
+    "rank": 4,
+    "learning_rate": 0.1,
+    "stop_conditions": {
+      "min_improvement_percent": 1.0,
+      "plateau_tolerance": 2
+    }
+  },
+  "reward_function": {
+    "formula": "Reward_i = 0.4*(-compile_time_ms_norm) + 0.3*(1 - error_rate) + 0.3*(-cpu_util%)",
+    "description": "Higher reward indicates faster, safer, and leaner compiler/runtime."
+  },
+  "metric_schema": {
+    "metrics": [
+      "compile_time_ms",
+      "mem_peak_mb",
+      "cpu_util_percent",
+      "error_rate"
+    ],
+    "normalization": {
+      "compile_time_ms": "lower_is_better",
+      "mem_peak_mb": "lower_is_better",
+      "cpu_util_percent": "lower_is_better",
+      "error_rate": "lower_is_better"
+    },
+    "expected_improvement_targets": {
+      "compile_time_ms": -20,
+      "mem_peak_mb": -10,
+      "cpu_util_percent": -15
+    }
+  },
+  "lrvr": {
+    "rank": 4,
+    "eta": 0.1,
+    "latent_factor_labels": [
+      "parser_latency",
+      "memory_efficiency",
+      "crypto_provider_overhead",
+      "runtime_stability"
+    ],
+    "update_rule": "U_s[i+1] = U_s[i] + η*(R_i - Q_i)*V_a[i]; V_a[i+1] = V_a[i] + η*(R_i - Q_i)*U_s[i]"
+  },
+  "output": {
+    "sections": [
+      "iteration_summaries",
+      "reward_evolution_table",
+      "lrvr_latent_dynamics",
+      "final_optimized_code",
+      "language_artifact_diffs"
+    ]
+  },
+  "safety": {
+    "constraints": [
+      "No insecure cryptographic primitives.",
+      "All generated providers must pass self-tests.",
+      "Preserve licensing and SBOM integrity."
+    ]
+  }
+}
